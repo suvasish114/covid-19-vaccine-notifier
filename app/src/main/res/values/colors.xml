@@ -13,4 +13,6 @@
     <color name="yellowdark">#ffcc00</color>
     <color name="yellowlight">#ffd633</color>
     <color name="gray">#f2f2f2</color>
+    <color name="red">#ff4d4d</color>
+    <color name="green">#29a329</color>
 </resources>

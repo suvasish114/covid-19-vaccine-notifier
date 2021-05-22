@@ -64,10 +64,11 @@
         android:text="Get Availability"
         android:layout_marginTop="100dp"/>
 
-    <androidx.fragment.app.FragmentContainerView
-        android:background="@color/gray"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/pin_rc_list"
         android:layout_marginTop="160dp"
-        android:layout_height="500dp"
-        android:layout_width="match_parent" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"/>
 
 </FrameLayout>

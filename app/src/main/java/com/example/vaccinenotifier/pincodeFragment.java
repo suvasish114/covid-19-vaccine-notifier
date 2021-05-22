@@ -3,6 +3,8 @@ package com.example.vaccinenotifier;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,15 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URL;
-import java.util.Vector;
-
 public class pincodeFragment extends Fragment {
-
-    private Vector<Integer> center_id;
-    private Vector<String> center_name;
-    private Vector<Integer> available_capacity;
-    private Vector<String> vaccine_name;
 
     private String date;
     private int pincode;
@@ -45,10 +39,15 @@ public class pincodeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_pincode, container, false);
+        RecyclerView pin_rc_view = view.findViewById(R.id.pin_rc_list);
         EditText et_date = view.findViewById(R.id.editTextDate);
         EditText et_pincode = view.findViewById(R.id.editTextPincode);
         Button btn = view.findViewById(R.id.fg_pincode_btn);
 
+        // set layout to view holder
+        pin_rc_view.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // set onclick listner
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -57,19 +56,16 @@ public class pincodeFragment extends Fragment {
                 pincode = Integer.parseInt(String.valueOf(et_pincode.getText()));
                 URL_pincode = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/findByPin?"+"pincode="+pincode+"&date="+date;
 
-                Toast.makeText(getActivity(), get_string(URL_pincode), Toast.LENGTH_SHORT).show();
+                get_pinAPIRequest(URL_pincode, pin_rc_view);
+
+                Toast.makeText(getActivity(), "geting data", Toast.LENGTH_SHORT).show();
             }
         });
         return view;
     }
 
-    String get_string(String str){
-        return str;
-    }
-
-    void get_pinAPIRequest(String URL_pincode){
-        //RequestQueue queue = Volley.newRequestQueue(MainActivity.class);
-
+    void get_pinAPIRequest(String URL_pincode, RecyclerView rc_view){
+        RequestQueue queue = Volley.newRequestQueue(getContext());
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, URL_pincode, null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -77,16 +73,30 @@ public class pincodeFragment extends Fragment {
                         // get data and store into vector
                         try {
                             JSONArray jsonArray = response.getJSONArray("sessions");
+
+                            // data to fetch
+                            String[] center_id = new String[jsonArray.length()];
+                            String[] center_name = new String[jsonArray.length()];
+                            String[] available_capacity = new String[jsonArray.length()];
+                            String[] vaccine_name = new String[jsonArray.length()];
+                            String[] address = new String[jsonArray.length()];
+                            String[] min_age_limit = new String[jsonArray.length()];
+
                             for(int i=0; i<jsonArray.length(); i++){
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
 
                                 // set the fetched data to vector array
-                                center_id.add(Integer.parseInt((String) jsonObject.get("center_id")));
-                                center_name.add((String) jsonObject.get("name"));
-                                available_capacity.add(Integer.parseInt((String) jsonObject.get("available_capacity")));
-                                vaccine_name.add((String) jsonObject.get("vaccine"));
+                                center_id[i] = jsonObject.getString("center_id");
+                                center_name[i] = jsonObject.getString("name");
+                                available_capacity[i] = jsonObject.getString("available_capacity");
+                                vaccine_name[i] = jsonObject.getString("vaccine");
+                                address[i] = jsonObject.getString("address");
+                                min_age_limit[i] = jsonObject.getString("min_age_limit");
 
                             }
+                            rc_view.setAdapter(new pinAdapter(
+                                    center_id, center_name, available_capacity, vaccine_name,address, min_age_limit
+                            ));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -94,8 +104,9 @@ public class pincodeFragment extends Fragment {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                //Toast.makeText(, "Error to get Request", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Error to get Request "+error.toString(), Toast.LENGTH_SHORT).show();
             }
         });
+        queue.add(jsonObjectRequest);
     }
 }
