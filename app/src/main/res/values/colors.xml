@@ -10,4 +10,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="primary">#7dd1ca</color>
     <color name="secondary">#0c2c47</color>
+    <color name="yellowdark">#ffcc00</color>
+    <color name="yellowlight">#ffd633</color>
+    <color name="gray">#f2f2f2</color>
 </resources>
